@@ -14,6 +14,10 @@ __pycache__/
 # Variables de entorno
 .env
 
+# Node.js
+node_modules/
+FigmaFrontEnd/node_modules/
+
 # Archivos de sistema
 .DS_Store
 Thumbs.db

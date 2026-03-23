@@ -1,211 +1,283 @@
-# Analizador de Rendimiento CS2 - donk (Team Spirit)
+# Dark Tactical Analytics Dashboard (FACEIT)
 
-Aplicacion web construida con Streamlit que extrae estadisticas del HTML de scope.gg
-y utiliza K-Means para detectar posibles fallas en el rendimiento del jugador.
+Dashboard web (Flask + Vite/React) que muestra estadísticas reales e historial de partidas vía FACEIT Open API.
 
----
-
-## Requisitos del sistema
-
-- Python 3.10 o superior
-- Conexion a internet (para el scraping de scope.gg)
-- Sistema operativo: Windows, macOS o Linux
+Frontend compilado en `FigmaFrontEnd/dist` y servido por Flask.
 
 ---
 
-## Instalacion
+## Características
 
-### 1. Clonar o descargar el proyecto
+- Interfaz moderna oscura - Tema Dark Tactical con colores naranja, azul, rojo y verde
+- Frontend Vite/React - UI tipo “dashboard” servida por Flask
+- Datos reales con FACEIT - Estadísticas + historial de partidas (requiere `FACEIT_API_KEY`)
 
-Coloca todos los archivos en una carpeta local, por ejemplo:
+---
 
-```
-C:\Users\tu_usuario\Documents\ProyectoDeIA\
-```
+## Requisitos
 
-### 2. Crear un entorno virtual (recomendado)
+- Python 3.8+
+- pip (gestor de paquetes Python)
 
-Abre una terminal en la carpeta del proyecto y ejecuta:
+---
 
-```
-python -m venv venv
-```
+## Instalación Rápida
 
-Activar el entorno virtual:
+### 1. Instala las dependencias
 
-- En Windows:
-  ```
-  venv\Scripts\activate
-  ```
-- En macOS / Linux:
-  ```
-  source venv/bin/activate
-  ```
-
-### 3. Instalar las dependencias
-
-Con el entorno virtual activo, instala todas las librerias necesarias:
-
-```
+```bash
 pip install -r requirements.txt
 ```
 
-Las dependencias instaladas son:
+### 2. Ejecuta el servidor
 
-| Libreria       | Uso                                          |
-|----------------|----------------------------------------------|
-| streamlit      | Interfaz web interactiva                     |
-| pandas         | Manipulacion de datos y tablas               |
-| numpy          | Calculo numerico y generacion de datasets    |
-| requests       | Peticiones HTTP para el scraping             |
-| beautifulsoup4 | Parseo del HTML recibido de scope.gg         |
-| scikit-learn   | Algoritmo K-Means para clasificacion IA      |
+Configura tu API key de FACEIT:
+
+```powershell
+$env:FACEIT_API_KEY = "TU_FACEIT_KEY_AQUI"
+# Opcional (si lo tienes):
+$env:FACEIT_APP_ID = "TU_FACEIT_APP_ID_AQUI"
+```
+
+Alternativa (más fácil): crea un archivo `.env` en la raíz del proyecto (misma carpeta que `server.py`) con:
+
+```env
+FACEIT_API_KEY=TU_FACEIT_KEY_AQUI
+FACEIT_APP_ID=TU_FACEIT_APP_ID_AQUI
+```
+
+CMD (solo para la sesión actual):
+
+Luego ejecuta:
+
+```bash
+python server.py
+```
+
+Nota: si cambias variables de entorno (por ejemplo `FACEIT_API_KEY`), reinicia el backend.
+
+### 3. Abre en tu navegador
+
+```
+http://localhost:5000
+```
 
 ---
 
-## Estructura del proyecto
+## Dependencias
+
+| Paquete | Versión | Uso |
+|---------|---------|-----|
+| Flask | ≥2.3.0 | Framework web backend |
+| Flask-CORS | ≥4.0.0 | Soporte CORS para APIs |
+| Requests | ≥2.31.0 | Peticiones HTTP |
+| python-dotenv | ≥1.0.0 | Cargar `.env` (opcional) |
+
+---
+
+## Estructura del Proyecto
 
 ```
 ProyectoDeIA/
-    app.py              -- Archivo principal (unico punto de entrada)
-    requirements.txt    -- Lista de dependencias
-    README.md           -- Este archivo
-    config.py           -- Configuracion legacy (no se usa en la version actual)
-    modules/            -- Modulos legacy (no se usan en la version actual)
+├── server.py                 # Backend Flask + APIs
+├── faceit_client.py          # Cliente FACEIT Open API
+├── requirements.txt          # Dependencias Python
+├── FigmaFrontEnd/            # Frontend Vite/React
+│   └── dist/                 # Build servido por Flask
+└── README.md                 # Este archivo
 ```
 
-> El archivo `app.py` es completamente autonomo. No depende de `config.py`
-> ni de la carpeta `modules/`.
+
 
 ---
 
-## Ejecucion
+## Ejecución
 
-Desde la terminal, dentro de la carpeta del proyecto:
+### Opción 1: Servidor Flask (Recomendado)
 
-```
-python -m streamlit run app.py
-```
-
-> Se usa `python -m streamlit` en lugar de `streamlit` directamente porque
-> en algunos sistemas Windows el comando `streamlit` no queda registrado
-> en el PATH del sistema al instalar con pip.
-
-Una vez iniciado, la terminal mostrara una URL similar a:
-
-```
-Local URL:   http://localhost:8501
-Network URL: http://192.168.x.x:8501
+```bash
+python server.py
 ```
 
-Abre esa direccion en tu navegador para ver la aplicacion.
+**Salida esperada:**
+```
+Dark Tactical Analytics Dashboard
+http://localhost:5000
+```
+
+Abre http://localhost:5000 en tu navegador.
+
+### Opción 2: Desarrollo con debug automático
+
+```bash
+# En Windows
+set FLASK_ENV=development && python server.py
+
+# En macOS/Linux
+export FLASK_ENV=development && python server.py
+```
 
 ---
 
-## Configuracion interna (archivo app.py)
+## Endpoints de API
 
-Todos los parametros configurables se encuentran al inicio de `app.py`,
-en la seccion marcada como `CONFIGURACION`.
+Todos los endpoints devuelven datos en formato **JSON**.
 
-### URL del perfil
+| Endpoint | Método | Descripción |
+|----------|--------|-------------|
+| `/` | GET | SPA (frontend) |
 
-```python
-URL_PERFIL = "https://app.scope.gg/progress/1212210896"
+### Endpoints FACEIT
+
+| Endpoint | Método | Descripción |
+|----------|--------|-------------|
+| `/api/faceit/status` | GET | Estado de configuración de FACEIT |
+| `/api/faceit/search?q=don` | GET | Autocomplete de nicknames (3+ chars) |
+| `/api/faceit/summary?nickname=donk` | GET | Resumen (lifetime + últimos matches) |
+| `/api/faceit/latest-match?nickname=donk` | GET | Última partida (si existe) |
+
+En el dashboard puedes escribir 3+ letras del nickname y usar “Sugerencias” para completar el nombre.
+
+**Ejemplo de uso:**
+
+```javascript
+// Fetchear datos del jugador
+fetch('/api/player')
+    .then(res => res.json())
+    .then(data => console.log(data));
 ```
-
-Cambia este valor si deseas analizar un perfil diferente de scope.gg.
-
-### Estadisticas de respaldo
-
-```python
-STATS_RESPALDO = {
-    "rating":       1.38,
-    "kpr":          0.89,
-    "headshot_pct": 52.3,
-    "impacto":      1.52,
-    "dpr":          0.62,
-    "kd":           1.42,
-    "adr":          85.4,
-}
-```
-
-scope.gg es una aplicacion React (SPA) y no siempre devuelve datos estructurados
-en el HTML estatico. Cuando el scraping no encuentra datos, la aplicacion usa
-estos valores verificados de donk (principios de 2026) como respaldo.
-
-Puedes actualizar estos valores con estadisticas mas recientes del jugador.
-
-### Promedios de referencia profesional
-
-```python
-PROMEDIOS_PRO = {
-    "rating":       1.00,
-    "kpr":          0.70,
-    "headshot_pct": 45.0,
-    "impacto":      1.00,
-    "dpr":          0.70,
-    "kd":           1.00,
-    "adr":          70.0,
-}
-```
-
-Estos valores representan el promedio de un jugador profesional tipico
-y se usan como linea base para detectar fallas. Puedes ajustarlos segun
-la fuente de referencia que prefieras (HLTV, Leetify, etc.).
-
-### Tiempo de cache del scraping
-
-```python
-@st.cache_data(ttl=3600)
-```
-
-El resultado del scraping se guarda en cache durante 3600 segundos (1 hora).
-Cambia ese numero si necesitas actualizaciones mas frecuentes o menos frecuentes.
 
 ---
 
-## Como funciona el analisis
+## Diseño Dark Tactical
 
-### Scraping del HTML
+### Paleta de Colores
 
-1. La aplicacion hace una peticion GET a `URL_PERFIL` simulando un navegador real.
-2. BeautifulSoup parsea el HTML recibido.
-3. Se busca primero el tag `<script id="__NEXT_DATA__">` (patron de Next.js).
-4. Si no se encuentra, se buscan bloques JSON en todos los `<script>` que contengan
-   palabras clave como `rating`, `kpr`, `adr`.
-5. Si se encuentra JSON con datos validos, se extraen y muestran.
-6. Si no se encuentran datos (caso comun con SPAs sin SSR), se usan `STATS_RESPALDO`.
+| Color | Código | Uso |
+|-------|--------|-----|
+| Fondo oscuro | `#0f1419` | Fondo principal |
+| Cards | `#1a1f3a` | Contenedores secundarios |
+| Naranja | `#ff6b35` | Acentos, resaltados |
+| Azul | `#0066ff` | Información, CT |
+| Rojo | `#ff3333` | Alertas, Team |
+| Verde | `#00dd88` | Success, positivo |
+| Amarillo | `#ffd700` | Warnings, atención |
 
-### Clasificacion con K-Means
+### Tipografía
 
-Se genera un dataset sintetico de 100 perfiles de jugadores en 3 niveles:
-Promedio, Bueno y Elite. El algoritmo K-Means entrena sobre ese dataset y luego
-clasifica al jugador analizado segun sus metricas de KPR, Impacto y Rating.
-
-### Deteccion de fallas
-
-Cada metrica se compara contra `PROMEDIOS_PRO`. Si la diferencia supera un umbral
-definido, se genera una alerta con severidad:
-
-- Alta: diferencia significativa, mostrada en rojo.
-- Media: diferencia moderada, mostrada en amarillo.
+- **Fuente**: System fonts (Apple/Segoe/Helvetica)
+- **Tamaño base**: 14-16px
+- **Headings**: 700 font-weight
+- **Espaciado**: Basado en múltiplos de 0.5rem
 
 ---
 
-## Sololucion de problemas comunes
+## Configuración
 
-**El comando `streamlit` no se reconoce:**
-Usa siempre `python -m streamlit run app.py` en lugar de `streamlit run app.py`.
+Este proyecto depende de FACEIT. Solo necesitas configurar `FACEIT_API_KEY` (y opcionalmente `FACEIT_APP_ID`).
 
-**La app muestra estadisticas de respaldo en lugar de datos en vivo:**
-Esto es esperado. scope.gg carga los datos de forma dinamica con JavaScript,
-por lo que el HTML estatico raramente contiene las estadisticas. La aplicacion
-lo indica en el expander "Detalle del scraping".
+### Cambiar puerto del servidor
 
-**Error de modulo no encontrado:**
-Asegurate de haber ejecutado `pip install -r requirements.txt` con el entorno
-virtual activo y de estar usando el mismo entorno al lanzar la app.
+En `server.py`, modifica la última línea:
 
-**Puerto ya en uso:**
-Streamlit buscara automaticamente el siguiente puerto disponible (8502, 8503, etc.).
-La URL correcta se muestra siempre en la terminal al iniciar.
+```python
+if __name__ == "__main__":
+    app.run(debug=True, host="0.0.0.0", port=5000)  # Cambiar 5000 a otro puerto
+```
+
+---
+
+## Troubleshooting
+
+### Error: "ModuleNotFoundError: No module named 'flask'"
+
+```bash
+pip install flask flask-cors
+```
+
+### Puerto 5000 ya está en uso
+
+Cambia el puerto en `server.py` o usa:
+
+```bash
+python server.py  # Intentar otro puerto
+```
+
+### El navegador muestra "Connection Refused"
+
+- Verifica que Flask está ejecutándose: revisa la consola
+- Abre http://localhost:5000 exactamente (no uses https://)
+- Intenta con http://127.0.0.1:5000
+
+### El CSS no se carga (página sin estilos)
+
+Verifica que la carpeta `static/` existe y contiene `style.css`.
+
+---
+
+## Secciones del Dashboard
+
+### 1. **Header**
+- Logo de Tactical Dashboard
+- Usuario actual (HijoDelGitpadre)
+
+### 2. **Match Analysis**
+- Información del mapa, tipo y fecha
+- Badges de Team (T) vs CT
+
+### 3. **Key Metrics**
+- Score Táctico, Precisión, Duelos Ganados, Eficiencia
+
+### 4. **Reporte de Desempeño**
+- Barras de progreso por aspecto clave
+
+### 5. **Perfil del Jugador**
+- Rol detectado y estadísticas personales
+
+### 6. **Recomendaciones Personalizadas**
+- Insights prioritarios con niveles
+
+### 7. **Errores Recurrentes**
+- Patrones negativos detectados
+
+### 8. **Áreas de Mejora**
+- Métricas a mejorar y objetivos
+
+### 9. **Comparación T vs CT**
+- Rendimiento por lado del equipo
+
+---
+
+## Próximas Mejoras
+
+- [ ] Base de datos con histórico
+- [ ] Gráficos avanzados (Chart.js)
+- [ ] Autenticación de usuarios
+- [ ] Exportar reportes en PDF
+- [ ] Notificaciones en tiempo real
+- [ ] Dashboard multi-jugador
+
+---
+
+## Stack Tecnológico
+
+### Backend
+- **Flask** - Framework web
+- **Pandas + NumPy** - Análisis de datos
+- **Scikit-learn** - Machine Learning (K-Means)
+
+### Frontend
+- **HTML5** - Estructura semántica
+- **CSS3 puro** - Sin librerías, máximo rendimiento
+- **JavaScript vanilla** - Sin dependencias externas
+
+---
+
+## Licencia
+
+Uso personal y educativo © 2026
+
+---
+
+**Versión 2.0** | Dark Tactical Analytics | Production Ready
+
