@@ -1,0 +1,23 @@
+# Entornos virtuales
+venv/
+.venv/
+env/
+
+# Cache de Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Cache de Streamlit
+.streamlit/
+
+# Variables de entorno
+.env
+
+# Node.js
+node_modules/
+FigmaFrontEnd/node_modules/
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
